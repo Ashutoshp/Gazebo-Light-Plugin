@@ -7,7 +7,7 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
-#include "std_msgs/Empty.h"
+#include "std_msgs/Bool.h"
 #include <ignition/math/Pose3.hh>
 #include "gazebo_msgs/SetModelState.h"
 #include "gazebo_msgs/GetModelState.h" 
@@ -64,10 +64,10 @@ namespace gazebo
                         mUpdateConnection(NULL),
                         mShowLight(false),
                         mLightPtr (NULL),
-                        mLightName("Turtlebot_light"),
+                        mLightName("Turtlebot_headlamp"),
                         mAttchedModel("mobile_base"),
                         mHeightOffset(1),
-                        mRosTopic("/toggle_light"),
+                        mRosTopic("/toggle_headlamp"),
                         mDebug(true),
                         mDebugMore(false) {
                 if (mDebug) {
@@ -107,7 +107,7 @@ namespace gazebo
                 // Command line to send the message
                 // rostopic pub /ground_plane_0/toggle_light std_msgs/Empty
                 ros::SubscribeOptions so =
-                    ros::SubscribeOptions::create<std_msgs::Empty>(
+                    ros::SubscribeOptions::create<std_msgs::Bool>(
                     "/" + this->mModel->GetName() + mRosTopic, 1,
                     boost::bind(&ControlLight::OnRosMsg, this, _1),
                     ros::VoidPtr(), &this->mRosQueue);
@@ -132,10 +132,10 @@ namespace gazebo
             // Handle an incoming message from ROS
             // TODO BUG consitency issues between GUI 
             // and command line control of light
-            void OnRosMsg(const std_msgs::EmptyConstPtr &_msg) {
+            void OnRosMsg(const std_msgs::BoolConstPtr &_msg) {
                 if (mDebug) printf("Entered ControlLight::OnRosMsg\n");
 	
-	            mShowLight = !mShowLight;
+	            mShowLight = _msg->data;
 	            physics::WorldPtr worldPtr = this->mModel->GetWorld();
             
                 if (mShowLight) {
